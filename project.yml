@@ -1,0 +1,56 @@
+name: CareerPulse
+options:
+  bundleIdPrefix: com.johnchen
+  deploymentTarget:
+    iOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+targets:
+  CareerPulse:
+    type: application
+    platform: iOS
+    sources: [CareerPulse]
+    info:
+      path: CareerPulse/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.johnchen.CareerPulse.refresh
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.johnchen.CareerPulse
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  CareerPulseUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [Tests/UITests]
+    dependencies:
+      - target: CareerPulse
+  CareerPulseTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests/UnitTests]
+    dependencies:
+      - target: CareerPulse
+    settings:
+      base:
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/CareerPulse.app/CareerPulse
+        BUNDLE_LOADER: $(TEST_HOST)
+schemes:
+  CareerPulse:
+    build:
+      targets:
+        CareerPulse: all
+        CareerPulseUITests: [test]
+        CareerPulseTests: [test]
+    run:
+      config: Debug
+    test:
+      targets: [CareerPulseTests, CareerPulseUITests]
