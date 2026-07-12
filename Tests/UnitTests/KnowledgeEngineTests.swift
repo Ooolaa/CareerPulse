@@ -13,7 +13,7 @@ struct KnowledgeEngineTests {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         return try! ModelContainer(
             for: FeedSource.self, Article.self, Concept.self,
-            LearningEvent.self, ConceptLink.self, ConceptDependency.self,
+            LearningEvent.self, ConceptLink.self, ConceptDependency.self, KnowledgePackRecord.self,
             configurations: config
         )
     }()
@@ -115,23 +115,5 @@ struct KnowledgeEngineTests {
         let links = try context.fetch(FetchDescriptor<ConceptLink>())
         #expect(links.count == 1)
         #expect(links[0].weight == 2)
-    }
-
-    @Test("resume seed populates mastered concepts with links, and only once")
-    func resumeSeed() throws {
-        UserDefaults.standard.removeObject(forKey: "resumeKnowledgeSeeded")
-        let context = try makeContext()
-
-        SeedData.seedResumeKnowledgeIfNeeded(context: context)
-        let concepts = try context.fetch(FetchDescriptor<Concept>())
-        let links = try context.fetch(FetchDescriptor<ConceptLink>())
-        #expect(concepts.count > 15)
-        #expect(concepts.allSatisfy { $0.isMarkedKnown && $0.masteryLevel == 1.0 })
-        #expect(!links.isEmpty)
-
-        // Idempotent: second call must not duplicate.
-        SeedData.seedResumeKnowledgeIfNeeded(context: context)
-        #expect(try context.fetch(FetchDescriptor<Concept>()).count == concepts.count)
-        UserDefaults.standard.removeObject(forKey: "resumeKnowledgeSeeded")
     }
 }

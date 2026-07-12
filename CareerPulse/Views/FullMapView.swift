@@ -9,11 +9,16 @@ struct FullMapView: View {
     @Query(sort: \Concept.masteryLevel, order: .reverse) private var concepts: [Concept]
     @Query private var links: [ConceptLink]
     @Query private var dependencies: [ConceptDependency]
+    @Query private var packRecords: [KnowledgePackRecord]
+
+    private var activePack: ActivePack? {
+        packRecords.first(where: \.isActive).map(ActivePack.init)
+    }
     @State private var selectedConcept: Concept?
     @State private var graphReset = UUID()
 
     private var frontierNames: Set<String> {
-        KnowledgePathEngine.frontier(concepts: concepts, dependencies: dependencies)
+        KnowledgePathEngine.frontier(concepts: concepts, dependencies: dependencies, pack: activePack)
     }
 
     /// Dots that arrived in the last 24 h — reading visibly grows the net.

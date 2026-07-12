@@ -5,6 +5,11 @@ import SwiftData
 /// cluster cards — lit vs dim — with a GAP badge and the specialty lane.
 struct KnowledgeMapView: View {
     @Query private var concepts: [Concept]
+    @Query private var packRecords: [KnowledgePackRecord]
+
+    private var activePack: ActivePack? {
+        packRecords.first(where: \.isActive).map(ActivePack.init)
+    }
     @State private var searchText = ""
     @State private var selectedConcept: Concept?
 
@@ -16,11 +21,11 @@ struct KnowledgeMapView: View {
     }
 
     private var stats: [KnowledgePathEngine.ClusterStats] {
-        KnowledgePathEngine.clusterStats(concepts: concepts)
+        KnowledgePathEngine.clusterStats(concepts: concepts, pack: activePack)
     }
 
     private var gapCluster: String? {
-        KnowledgePathEngine.gapCluster(concepts: concepts)
+        KnowledgePathEngine.gapCluster(concepts: concepts, pack: activePack)
     }
 
     private var totalLit: (lit: Int, total: Int) {
@@ -28,11 +33,11 @@ struct KnowledgeMapView: View {
     }
 
     private var gridStats: [KnowledgePathEngine.ClusterStats] {
-        stats.filter { $0.name != KnowledgePack.specialtyCluster }
+        stats.filter { $0.name != activePack?.specialtyCluster }
     }
 
     private var specialty: KnowledgePathEngine.ClusterStats? {
-        stats.first { $0.name == KnowledgePack.specialtyCluster }
+        stats.first { $0.name == activePack?.specialtyCluster }
     }
 
     var body: some View {

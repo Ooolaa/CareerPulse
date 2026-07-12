@@ -38,12 +38,13 @@ enum QuizEngine {
 
     static func makeQuiz(for concepts: [Concept], context: ModelContext) async -> [QuizQuestion] {
         let all = (try? context.fetch(FetchDescriptor<Concept>())) ?? []
+        let packNames = ActivePack.load(context: context)?.conceptNames ?? []
         var questions: [QuizQuestion] = []
         for concept in concepts {
             if IntelligenceService.isModelAvailable,
                let generated = await generateQuestion(for: concept) {
                 questions.append(generated)
-            } else if let templated = templateQuestion(for: concept, all: all) {
+            } else if let templated = templateQuestion(for: concept, all: all, packNames: packNames) {
                 questions.append(templated)
             }
         }
@@ -71,8 +72,8 @@ enum QuizEngine {
     /// Offline fallback: "which concept matches this definition". Distractors
     /// come from the same cluster first (plausible), then other pack concepts —
     /// never from stray article extractions.
-    private static func templateQuestion(for concept: Concept, all: [Concept]) -> QuizQuestion? {
-        let packNames = Set(KnowledgePack.concepts.map(\.name))
+    private static func templateQuestion(for concept: Concept, all: [Concept],
+                                         packNames: Set<String>) -> QuizQuestion? {
         let pool = all.filter { $0.name != concept.name && !$0.conceptDefinition.isEmpty }
         let sameCluster = pool.filter { $0.category == concept.category }.map(\.name).shuffled()
         let otherPack = pool.filter { $0.category != concept.category && packNames.contains($0.name) }

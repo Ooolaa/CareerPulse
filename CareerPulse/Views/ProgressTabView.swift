@@ -7,6 +7,11 @@ import Charts
 struct ProgressTabView: View {
     @Query private var concepts: [Concept]
     @Query private var articles: [Article]
+    @Query private var packRecords: [KnowledgePackRecord]
+
+    private var activePack: ActivePack? {
+        packRecords.first(where: \.isActive).map(ActivePack.init)
+    }
     @Environment(\.modelContext) private var modelContext
     @State private var quizRequest: QuizRequest?
 
@@ -92,10 +97,10 @@ struct ProgressTabView: View {
     // MARK: AI engineer path (design 4d)
 
     private var learningPathCard: some View {
-        let stages = KnowledgePathEngine.stageProgress(concepts: concepts)
+        let stages = KnowledgePathEngine.stageProgress(concepts: concepts, pack: activePack)
         let currentIndex = stages.firstIndex { !$0.isComplete } ?? stages.count - 1
         return VStack(alignment: .leading, spacing: 2) {
-            Text("AI engineer path")
+            Text("\(activePack?.careerName ?? "Learning") path")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
             Text("Dependency-ordered · from the knowledge pack")
@@ -173,10 +178,10 @@ struct ProgressTabView: View {
     }
 
     private var sideQuestCard: some View {
-        let progress = KnowledgePathEngine.sideQuestProgress(concepts: concepts)
+        let progress = KnowledgePathEngine.specialtyProgress(concepts: concepts, pack: activePack)
         return HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Side quest: On-Device AI")
+                Text("Side quest: \(activePack?.specialtyCluster ?? "Specialty")")
                     .font(.system(size: 13.5, weight: .bold))
                     .foregroundStyle(Theme.textPrimary)
                 Text("\(progress.lit) of \(progress.total) lit · your specialty lane runs in parallel")

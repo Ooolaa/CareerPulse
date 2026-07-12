@@ -7,6 +7,11 @@ struct FeedView: View {
     @Query private var sources: [FeedSource]
     @Query private var allConcepts: [Concept]
     @Query private var dependencies: [ConceptDependency]
+    @Query private var packRecords: [KnowledgePackRecord]
+
+    private var activePack: ActivePack? {
+        packRecords.first(where: \.isActive).map(ActivePack.init)
+    }
     @State private var selectedCategory: String?
     @State private var isSyncing = false
     @State private var searchText = ""
@@ -146,15 +151,15 @@ struct FeedView: View {
 
     private var nextDot: KnowledgePathEngine.Recommendation? {
         KnowledgePathEngine.nextDot(concepts: allConcepts, dependencies: dependencies,
-                                    articles: articles)
+                                    articles: articles, pack: activePack)
     }
 
     private var frontierNames: Set<String> {
-        KnowledgePathEngine.frontier(concepts: allConcepts, dependencies: dependencies)
+        KnowledgePathEngine.frontier(concepts: allConcepts, dependencies: dependencies, pack: activePack)
     }
 
     private var gapClusterName: String? {
-        KnowledgePathEngine.gapCluster(concepts: allConcepts)
+        KnowledgePathEngine.gapCluster(concepts: allConcepts, pack: activePack)
     }
 
     /// "YOUR NEXT DOT" gap-detector banner (design 4c).

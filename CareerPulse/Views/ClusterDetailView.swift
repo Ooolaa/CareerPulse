@@ -7,6 +7,11 @@ struct ClusterDetailView: View {
     let clusterName: String
     @Query private var concepts: [Concept]
     @Query private var dependencies: [ConceptDependency]
+    @Query private var packRecords: [KnowledgePackRecord]
+
+    private var activePack: ActivePack? {
+        packRecords.first(where: \.isActive).map(ActivePack.init)
+    }
     @State private var selectedConcept: Concept?
 
     private var clusterConcepts: [Concept] {
@@ -21,7 +26,7 @@ struct ClusterDetailView: View {
     /// Frontier is computed over ALL concepts (cross-cluster prerequisites
     /// count), then shown for this cluster's dots.
     private var frontierNames: Set<String> {
-        KnowledgePathEngine.frontier(concepts: concepts, dependencies: dependencies)
+        KnowledgePathEngine.frontier(concepts: concepts, dependencies: dependencies, pack: activePack)
     }
 
     private var litCount: Int {
@@ -29,7 +34,7 @@ struct ClusterDetailView: View {
     }
 
     private var nextConcept: Concept? {
-        let pathOrder = KnowledgePack.stages.flatMap(\.conceptNames) + KnowledgePack.sideQuestConcepts
+        let pathOrder = activePack?.pathOrder ?? []
         let localFrontier = frontierNames.intersection(clusterConcepts.map(\.name))
         guard !localFrontier.isEmpty else { return nil }
         let name = pathOrder.first(where: localFrontier.contains) ?? localFrontier.sorted()[0]
