@@ -12,7 +12,7 @@ enum PreviewData {
             configurations: config
         )
         let context = container.mainContext
-        SeedData.seedIfNeeded(context: context)
+        try? PackInstaller.install(BuiltinPacks.aiEngineer, source: "builtin", context: context)
 
         let attention = Concept(name: "Attention", category: "LLMs",
                                 definition: "How a model weighs which parts of its input matter for each output token.")

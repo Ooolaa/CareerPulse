@@ -20,6 +20,8 @@ enum SeedData {
 
     @MainActor
     static func seedIfNeeded(context: ModelContext) {
+        // New users choose/build their pack in the onboarding wizard.
+        guard UserDefaults.standard.bool(forKey: "hasOnboarded") else { return }
         let active = FetchDescriptor<KnowledgePackRecord>(predicate: #Predicate { $0.isActive })
         let hasPack = ((try? context.fetchCount(active)) ?? 0) > 0
         guard !hasPack else { return }

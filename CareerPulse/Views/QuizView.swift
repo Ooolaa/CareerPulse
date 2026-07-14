@@ -141,7 +141,7 @@ struct QuizView: View {
             : (isSelected ? Theme.stateLearning : Theme.cardBorder)
         let background: Color = checked
             ? (isCorrect ? Theme.knownTint : (isSelected ? Color(hex: 0xFDF0EF) : Theme.card))
-            : (isSelected ? Color(hex: 0xF3F7FE) : Theme.card)
+            : (isSelected ? Theme.accentWash : Theme.card)
 
         return Button {
             guard !checked else { return }

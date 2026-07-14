@@ -9,8 +9,42 @@
 instead of a gender question · pack generation on-device by default with
 optional bring-your-own API key (Keychain) · all data stays local.
 
-**Milestones:** U1 scaffold ✅ · U2 runtime packs ✅ · U3 onboarding wizard +
-themes · U4 AI pack generation + BYO key · U5 polish/share/docs.
+**Milestones:** U1 scaffold ✅ · U2 runtime packs ✅ · U3 wizard + themes ✅ ·
+U4 AI pack generation + BYO key · U5 polish/share/docs.
+
+---
+
+## 2026-07-14 — U3: onboarding wizard + dynamic themes
+
+**Built**
+- Re-synced TechPulse's readability round first (semantic zoom, glossary
+  strip, full-text fetch, settings headers, streak pill) — merged by hand
+  where U2's pack-awareness had diverged (FullMapView, ClusterDetailView,
+  ProgressTabView).
+- **Dynamic themes**: `Palette` (Ocean/Plum/Forest/Sunset/Mono) with the
+  chassis and mastery semantics constant — only the accent hue changes;
+  hardcoded accent literals routed through `Theme.accentWash/accentBorder`;
+  whole tree re-renders live via `.id(paletteName)`.
+- **5-step onboarding wizard**: 1 career (starter packs + JSON import +
+  free-text placeholder for U4 generation) → 2 editable review (swipe-delete
+  and rename propagate through prerequisites & stages via `PackDraft`, so the
+  draft always stays installable) → 3 style picker (live re-theme) →
+  4 sources (toggle suggested + paste-a-URL with `FeedDiscovery`: direct feed
+  probe, else `<link rel=alternate>` discovery) → install → 5 "mark what you
+  know" chips (green dots from day one).
+- Settings: Appearance picker · Career pack section (current pack, **Export
+  my pack** as shareable JSON via Transferable, **Start a new career** which
+  re-runs the wizard while keeping mastery).
+- SeedData now only auto-installs for already-onboarded users; new users get
+  their pack from the wizard.
+
+**Verified** 29 unit tests (4 new PackDraft propagation tests) + full UI
+journey driving the wizard end-to-end with screenshots of every step.
+
+**Learned** The journey test caught a real first-run bug: Feed's sync task
+fires before the wizard installs sources, leaving a new user with an empty
+feed — fixed by re-syncing when sources first appear. UI tests keep earning
+their keep.
 
 ---
 

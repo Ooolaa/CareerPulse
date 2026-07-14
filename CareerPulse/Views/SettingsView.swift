@@ -7,6 +7,9 @@ struct SettingsView: View {
     @State private var isSyncing = false
     @AppStorage("articleTextSize") private var textSize = "Medium"
     @AppStorage("dailyReadingGoal") private var dailyGoal = 3
+    @AppStorage(Theme.paletteKey) private var paletteName = "Ocean"
+    @AppStorage("hasOnboarded") private var hasOnboarded = false
+    @Query private var packRecords: [KnowledgePackRecord]
 
     private var lastSynced: Date? {
         sources.compactMap(\.lastFetched).max()
@@ -29,7 +32,7 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 ForEach(grouped, id: \.category) { group in
-                    Section(group.category) {
+                    Section {
                         ForEach(group.sources) { source in
                             Toggle(isOn: Bindable(source).isEnabled) {
                                 VStack(alignment: .leading, spacing: 2) {
@@ -42,9 +45,11 @@ struct SettingsView: View {
                             }
                             .tint(Theme.stateKnown)
                         }
+                    } header: {
+                        SettingsHeader(group.category)
                     }
                 }
-                Section("Sync & Storage") {
+                Section {
                     Button {
                         Task {
                             isSyncing = true
@@ -63,6 +68,38 @@ struct SettingsView: View {
                     }
                     .disabled(isSyncing)
                     LabeledContent("Storage used", value: storageUsed)
+                } header: {
+                    SettingsHeader("Sync & Storage")
+                }
+                Section {
+                    Picker("Style", selection: $paletteName) {
+                        ForEach(Palette.all) { palette in
+                            Text(palette.name).tag(palette.name)
+                        }
+                    }
+                } header: {
+                    SettingsHeader("Appearance")
+                }
+                Section {
+                    LabeledContent("Career",
+                                   value: packRecords.first(where: \.isActive)?.careerName ?? "None")
+                    if let pack = PackInstaller.exportActivePack(context: modelContext) {
+                        ShareLink(item: PackExportFile(pack: pack),
+                                  preview: SharePreview("\(pack.career) pack")) {
+                            Text("Export my pack")
+                                .foregroundStyle(Theme.stateLearning)
+                        }
+                    }
+                    Button {
+                        hasOnboarded = false     // wizard re-runs; mastery is kept
+                    } label: {
+                        Text("Start a new career")
+                            .foregroundStyle(Theme.stateLearning)
+                    }
+                } header: {
+                    SettingsHeader("Career pack")
+                } footer: {
+                    Text("Exported packs are plain JSON — AirDrop them to a friend or keep them as a backup. Starting a new career keeps everything you've already learned.")
                 }
                 Section {
                     Picker("Text size", selection: $textSize) {
@@ -77,7 +114,7 @@ struct SettingsView: View {
                         Text("10 articles").tag(10)
                     }
                 } header: {
-                    Text("Reading")
+                    SettingsHeader("Reading")
                 } footer: {
                     Text("Start tiny — a goal you hit daily beats one you abandon. The feed caps at 30 fresh articles a day so it never becomes a chore.")
                 }
@@ -86,7 +123,7 @@ struct SettingsView: View {
                     LabeledContent("Intelligence", value: IntelligenceService.isModelAvailable
                                    ? "Apple Intelligence" : "On-device fallback")
                 } header: {
-                    Text("About")
+                    SettingsHeader("About")
                 } footer: {
                     Text("All analysis happens on-device. No analytics; nothing leaves your iPhone. Read articles older than 60 days are pruned automatically.")
                 }
@@ -98,7 +135,38 @@ struct SettingsView: View {
     }
 }
 
+/// Legible section header — the default List header gray disappears against
+/// the light background.
+struct SettingsHeader: View {
+    let title: String
+    init(_ title: String) { self.title = title }
+
+    var body: some View {
+        Text(title)
+            .font(.system(size: 13.5, weight: .heavy))
+            .kerning(0.5)
+            .foregroundStyle(Theme.textPrimary)
+            .textCase(.uppercase)
+            .padding(.bottom, 2)
+    }
+}
+
 #Preview {
     SettingsView()
         .modelContainer(PreviewData.container)
+}
+
+import CoreTransferable
+import UniformTypeIdentifiers
+
+/// Plain-JSON pack export for ShareLink (AirDrop / Files / Messages).
+struct PackExportFile: Transferable {
+    let pack: PackFile
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .json) { export in
+            try JSONEncoder().encode(export.pack)
+        }
+        .suggestedFileName { "\($0.pack.career).careerpack.json" }
+    }
 }

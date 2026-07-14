@@ -83,6 +83,12 @@ struct FeedView: View {
             // Catch up on any articles still awaiting on-device analysis.
             await IntelligenceService.analyzePending(context: modelContext)
         }
+        .onChange(of: sources.count) {
+            // The wizard installs sources AFTER this view first appeared -
+            // first sources arriving means onboarding just finished: fetch now.
+            guard lastSynced == nil, !sources.isEmpty else { return }
+            Task { await sync() }
+        }
     }
 
     private func sync() async {
@@ -203,12 +209,12 @@ struct FeedView: View {
         .padding(.vertical, 15)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            LinearGradient(colors: [Color(hex: 0xF3F7FE), .white],
+            LinearGradient(colors: [Theme.accentWash, .white],
                            startPoint: .top, endPoint: .bottom),
             in: RoundedRectangle(cornerRadius: Theme.cardRadius)
         )
         .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius)
-            .strokeBorder(Color(hex: 0xDCE7F8), lineWidth: 1))
+            .strokeBorder(Theme.accentBorder, lineWidth: 1))
         .accessibilityIdentifier("nextDotBanner")
     }
 
@@ -427,7 +433,7 @@ struct ArticleCard: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(hex: 0xF3F7FE), in: RoundedRectangle(cornerRadius: 10))
+                .background(Theme.accentWash, in: RoundedRectangle(cornerRadius: 10))
             }
         }
         .padding(16)

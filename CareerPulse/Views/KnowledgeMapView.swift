@@ -198,12 +198,12 @@ struct KnowledgeMapView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(
-            LinearGradient(colors: [Color(hex: 0xF3F7FE), .white],
+            LinearGradient(colors: [Theme.accentWash, .white],
                            startPoint: .top, endPoint: .bottom),
             in: RoundedRectangle(cornerRadius: Theme.cardRadius)
         )
         .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius)
-            .strokeBorder(Color(hex: 0xDCE7F8), lineWidth: 1))
+            .strokeBorder(Theme.accentBorder, lineWidth: 1))
     }
 }
 
@@ -256,7 +256,7 @@ struct ClusterCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
         .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius)
-            .strokeBorder(isGap ? Color(hex: 0xD6E4FA) : Theme.cardBorder,
+            .strokeBorder(isGap ? Theme.accentBorder : Theme.cardBorder,
                           lineWidth: isGap ? 1.5 : 1))
     }
 

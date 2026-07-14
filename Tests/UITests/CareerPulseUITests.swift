@@ -16,12 +16,28 @@ final class CareerPulseUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        // First run shows onboarding (design 3a): topics preselected, continue.
-        let continueButton = app.buttons["onboardingContinue"].firstMatch
+        // First run shows the pack wizard: pick starter -> review -> style ->
+        // sources (installs) -> mark-known -> start learning.
+        let continueButton = app.buttons["wizardContinue"].firstMatch
         if continueButton.waitForExistence(timeout: 5) {
-            snap(app, "0-onboarding")
-            XCTAssertTrue(continueButton.isEnabled, "Continue disabled despite preselected topics")
-            continueButton.tap()
+            snap(app, "0-wizard-career")
+            let starter = app.buttons["starterPack"].firstMatch
+            XCTAssertTrue(starter.waitForExistence(timeout: 3), "no starter packs shown")
+            starter.tap()                                  // AI Engineer
+            XCTAssertTrue(continueButton.isEnabled)
+            continueButton.tap()                           // review
+            sleep(1)
+            snap(app, "0b-wizard-review")
+            continueButton.tap()                           // style
+            sleep(1)
+            snap(app, "0c-wizard-style")
+            continueButton.tap()                           // sources
+            sleep(1)
+            snap(app, "0d-wizard-sources")
+            continueButton.tap()                           // installs pack -> know step
+            sleep(2)
+            snap(app, "0e-wizard-know")
+            continueButton.tap()                           // start learning
             sleep(1)
         }
 

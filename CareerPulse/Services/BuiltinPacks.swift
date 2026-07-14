@@ -5,7 +5,7 @@ import Foundation
 enum BuiltinPacks {
     static var all: [PackFile] { [aiEngineer, registeredNurse] }
 
-    /// The proven TechPulse pack, rebuilt from `KnowledgePack`'s static data.
+    /// The proven CareerPulse pack, rebuilt from `KnowledgePack`'s static data.
     static var aiEngineer: PackFile {
         PackFile(
             career: "AI Engineer",

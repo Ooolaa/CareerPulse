@@ -33,6 +33,15 @@ struct ClusterDetailView: View {
         clusterConcepts.filter(KnowledgePathEngine.isLit).count
     }
 
+    /// New-since-you-started dots only (initial seeding batch excluded).
+    private var recentNames: Set<String> {
+        guard let epoch = concepts.map(\.firstSeen).min() else { return [] }
+        let cutoff = Date.now.addingTimeInterval(-86_400)
+        return Set(clusterConcepts
+            .filter { $0.firstSeen > cutoff && $0.firstSeen > epoch.addingTimeInterval(3_600) }
+            .map(\.name))
+    }
+
     private var nextConcept: Concept? {
         let pathOrder = activePack?.pathOrder ?? []
         let localFrontier = frontierNames.intersection(clusterConcepts.map(\.name))
@@ -50,9 +59,7 @@ struct ClusterDetailView: View {
                 ForceGraphView(concepts: clusterConcepts, links: [],
                                dependencies: clusterDependencies,
                                frontier: frontierNames,
-                               recent: Set(clusterConcepts
-                                   .filter { $0.firstSeen > Date.now.addingTimeInterval(-86_400) }
-                                   .map(\.name))) { name in
+                               recent: recentNames) { name in
                     selectedConcept = clusterConcepts.first { $0.name == name }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 22))
@@ -144,7 +151,7 @@ struct ClusterDetailView: View {
                 .padding(.horizontal, 15)
                 .padding(.vertical, 13)
                 .background(Theme.card.opacity(0.95), in: RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color(hex: 0xDCE7F8), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.accentBorder, lineWidth: 1))
                 .shadow(color: Color(hex: 0x17181A).opacity(0.1), radius: 12, y: 6)
             }
             .buttonStyle(.plain)

@@ -33,6 +33,14 @@ struct ProgressTabView: View {
                             .font(.system(size: 24, weight: .heavy))
                             .foregroundStyle(Theme.textPrimary)
                         Spacer()
+                        // Don't break the chain — the streak stays in sight.
+                        Text("\(readingStreakDays)-day streak")
+                            .font(.system(size: 11.5, weight: .bold))
+                            .foregroundStyle(readingStreakDays > 0 ? Theme.stateLearning : Theme.textTertiary)
+                            .padding(.horizontal, 13)
+                            .padding(.vertical, 6)
+                            .background(readingStreakDays > 0 ? Theme.learningTint : Theme.newTint,
+                                        in: Capsule())
                     }
                     .padding(.horizontal, 4)
                     .padding(.top, 6)
@@ -193,12 +201,12 @@ struct ProgressTabView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(
-            LinearGradient(colors: [Color(hex: 0xF3F7FE), .white],
+            LinearGradient(colors: [Theme.accentWash, .white],
                            startPoint: .top, endPoint: .bottom),
             in: RoundedRectangle(cornerRadius: Theme.cardRadius)
         )
         .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius)
-            .strokeBorder(Color(hex: 0xDCE7F8), lineWidth: 1))
+            .strokeBorder(Theme.accentBorder, lineWidth: 1))
     }
 
     // MARK: Concepts learned (cumulative)
@@ -309,12 +317,12 @@ struct ProgressTabView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(
-            LinearGradient(colors: [Color(hex: 0xF3F7FE), .white],
+            LinearGradient(colors: [Theme.accentWash, .white],
                            startPoint: .top, endPoint: .bottom),
             in: RoundedRectangle(cornerRadius: Theme.cardRadius)
         )
         .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius)
-            .strokeBorder(Color(hex: 0xDCE7F8), lineWidth: 1))
+            .strokeBorder(Theme.accentBorder, lineWidth: 1))
     }
 }
 
