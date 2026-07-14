@@ -17,13 +17,13 @@ func c(_ hex: UInt32, _ a: CGFloat = 1) -> CGColor {
 
 // ── Background: deep navy → electric blue, light from top-right
 let bg = CGGradient(colorsSpace: srgb,
-                    colors: [c(0x0C1440), c(0x16309B), c(0x2B62DF), c(0x4C8DF2)] as CFArray,
+                    colors: [c(0x1A0E3D), c(0x4B2E83), c(0x2E8B8B), c(0x3FC7B4)] as CFArray,
                     locations: [0, 0.42, 0.78, 1])!
 ctx.drawLinearGradient(bg, start: CGPoint(x: 60, y: 60), end: CGPoint(x: 1000, y: 1000), options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
 
 // Cyan bloom at the light source
 let bloom = CGGradient(colorsSpace: srgb,
-                       colors: [c(0x9BE8FF, 0.4), c(0x9BE8FF, 0)] as CFArray, locations: [0, 1])!
+                       colors: [c(0xB8FFE8, 0.42), c(0x9BE8FF, 0)] as CFArray, locations: [0, 1])!
 ctx.drawRadialGradient(bloom, startCenter: CGPoint(x: 830, y: 860), startRadius: 0,
                        endCenter: CGPoint(x: 830, y: 860), endRadius: 620, options: [])
 

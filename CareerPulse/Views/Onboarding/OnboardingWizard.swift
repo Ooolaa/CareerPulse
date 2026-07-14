@@ -20,6 +20,10 @@ struct OnboardingWizard: View {
     @State private var probeInput = ""
     @State private var probeFailed = false
     @State private var renameTarget: String?
+    @State private var generating = false
+    @State private var genStatus = ""
+    @State private var keyInput = ""
+    @State private var keySaved = KeychainStore.hasAnthropicKey
     @State private var renameText = ""
 
     private let totalSteps = 5
@@ -120,10 +124,8 @@ struct OnboardingWizard: View {
                     .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.cardBorder, lineWidth: 1))
                     .padding(.top, 14)
                 if !careerText.trimmingCharacters(in: .whitespaces).isEmpty {
-                    Text("On-device AI pack generation for “\(careerText)” arrives in the next update — pick a starter pack or import one for now.")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Theme.textSecondary)
-                        .padding(.top, 6)
+                    generationHint
+                        .padding(.top, 8)
                 }
             }
         }
@@ -171,12 +173,60 @@ struct OnboardingWizard: View {
         }
     }
 
+    /// Availability + inline key entry for typed-career generation.
+    private var generationHint: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            switch PackGenerator.availability {
+            case .onDevice:
+                Label("Will generate “\(typedCareer)” on-device — private, free.",
+                      systemImage: "sparkles")
+                    .font(.system(size: 12.5, weight: .semibold))
+                    .foregroundStyle(Theme.stateLearning)
+            case .byoKey:
+                Label("Will generate “\(typedCareer)” with your Claude API key.",
+                      systemImage: "sparkles")
+                    .font(.system(size: 12.5, weight: .semibold))
+                    .foregroundStyle(Theme.stateLearning)
+            case .unavailable:
+                Text("Generating “\(typedCareer)” needs Apple Intelligence — or paste your own Claude API key (stored only in your iPhone's Keychain):")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                HStack(spacing: 8) {
+                    SecureField("sk-ant-…", text: $keyInput)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(10)
+                        .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.cardBorder, lineWidth: 1))
+                    Button("Save") {
+                        if KeychainStore.save(keyInput.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                            keySaved = true
+                            keyInput = ""
+                        }
+                    }
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Theme.stateLearning)
+                    .disabled(keyInput.isEmpty)
+                }
+            }
+        }
+    }
+
     // MARK: Step 2 — review (edit the map before it exists)
 
     private var reviewStep: some View {
         VStack(alignment: .leading, spacing: 0) {
             stepTitle("Your map, your blocks",
                       subtitle: "Swipe to remove concepts you don't want; tap to rename. Everything stays editable later.")
+            if draft?.origin == "generated" {
+                Text("AI-generated — review names and definitions. For regulated fields this is educational scaffolding, not professional advice.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.accentWash, in: RoundedRectangle(cornerRadius: 10))
+                    .padding(.top, 8)
+            }
             List {
                 ForEach(draft?.conceptsByCluster ?? [], id: \.cluster) { group in
                     Section {
@@ -348,9 +398,17 @@ struct OnboardingWizard: View {
 
     // MARK: Continue
 
+    private var typedCareer: String {
+        careerText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var willGenerate: Bool {
+        draft == nil && !typedCareer.isEmpty && PackGenerator.availability != .unavailable
+    }
+
     private var continueEnabled: Bool {
         switch step {
-        case 1: return draft != nil
+        case 1: return (draft != nil || willGenerate) && !generating
         case 2: return (draft?.file.concepts.count ?? 0) > 0
         default: return true
         }
@@ -360,12 +418,18 @@ struct OnboardingWizard: View {
         Button {
             advance()
         } label: {
-            Text(step == 4 ? "Build my app" : step == totalSteps ? "Start learning" : "Continue")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, minHeight: 52)
-                .background(continueEnabled ? Theme.stateLearning : Theme.stateNew,
-                            in: RoundedRectangle(cornerRadius: 16))
+            HStack(spacing: 8) {
+                if generating { ProgressView().tint(.white).controlSize(.small) }
+                Text(generating ? genStatus
+                     : step == 1 && willGenerate ? "Generate my map"
+                     : step == 4 ? "Build my app"
+                     : step == totalSteps ? "Start learning" : "Continue")
+            }
+            .font(.system(size: 16, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .background(continueEnabled ? Theme.stateLearning : Theme.stateNew,
+                        in: RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
         .disabled(!continueEnabled)
@@ -374,6 +438,23 @@ struct OnboardingWizard: View {
     }
 
     private func advance() {
+        if step == 1, willGenerate {
+            generating = true
+            genStatus = "Designing your map…"
+            Task {
+                do {
+                    let pack = try await PackGenerator.generate(career: typedCareer) { status in
+                        Task { @MainActor in genStatus = status }
+                    }
+                    draft = PackDraft(file: pack, origin: "generated")
+                    step = 2
+                } catch {
+                    installError = error.localizedDescription
+                }
+                generating = false
+            }
+            return
+        }
         if step == 4 {
             guard let draft else { return }
             do {

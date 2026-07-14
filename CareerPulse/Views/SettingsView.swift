@@ -10,6 +10,8 @@ struct SettingsView: View {
     @AppStorage(Theme.paletteKey) private var paletteName = "Ocean"
     @AppStorage("hasOnboarded") private var hasOnboarded = false
     @Query private var packRecords: [KnowledgePackRecord]
+    @State private var keyInput = ""
+    @State private var hasKey = KeychainStore.hasAnthropicKey
 
     private var lastSynced: Date? {
         sources.compactMap(\.lastFetched).max()
@@ -98,6 +100,37 @@ struct SettingsView: View {
                     }
                 } header: {
                     SettingsHeader("Career pack")
+                } footer: {
+                    Text("")
+                }
+                Section {
+                    LabeledContent("On-device model",
+                                   value: IntelligenceService.isModelAvailable ? "Available" : "Not available")
+                    if hasKey {
+                        LabeledContent("Claude API key", value: "Connected ••••")
+                        Button(role: .destructive) {
+                            KeychainStore.delete()
+                            hasKey = false
+                        } label: {
+                            Text("Remove key")
+                        }
+                    } else {
+                        SecureField("Claude API key (sk-ant-…)", text: $keyInput)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        Button {
+                            if KeychainStore.save(keyInput.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                                hasKey = true
+                                keyInput = ""
+                            }
+                        } label: {
+                            Text("Save key")
+                                .foregroundStyle(Theme.stateLearning)
+                        }
+                        .disabled(keyInput.isEmpty)
+                    }
+                } header: {
+                    SettingsHeader("AI engine")
                 } footer: {
                     Text("Exported packs are plain JSON — AirDrop them to a friend or keep them as a backup. Starting a new career keeps everything you've already learned.")
                 }
