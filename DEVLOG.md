@@ -14,6 +14,35 @@ U4 AI pack generation + BYO key · U5 polish/share/docs.
 
 ---
 
+## 2026-07-31 — The repo leaves the laptop; agent skills configured
+
+**Built**
+- **CareerPulse is on GitHub** — private, at `Ooolaa/CareerPulse`. Since the
+  U1 scaffold this repo has existed in exactly one place, with no backup and no
+  remote; the six commits of U1–U5 have now been pushed. History was scanned
+  for key-shaped strings and sensitive files before pushing — the BYO API key
+  lives in the Keychain, never in the tree, and nothing turned up.
+- **`docs/agents/`** — `issue-tracker.md` (GitHub issues via the `gh` CLI),
+  `triage-labels.md`, `domain.md`, with a new root **`CLAUDE.md`** pointing at
+  them. The triage roles were created as real labels on the new repo:
+  `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, plus
+  GitHub's stock `wontfix`.
+- **Identical config to TechPulse, on purpose.** The re-sync from TechPulse tip
+  is a hand-merge of Swift sources, so root files have never collided — but
+  keeping these four byte-identical means they can't start.
+
+**Verified** Remote `main` matches local `main` at `f2b682c`. `gh label list`
+returns all five canonical roles on the new repo.
+
+**Learned** Choosing GitHub over local-markdown issues for this repo was
+settled by an argument that turned out to be wrong — a feared config collision
+during re-sync that the actual re-sync commit disproves (it touched only
+`CareerPulse/**/*.swift`, `Tests/`, and `project.pbxproj`). The decision still
+holds on its own merits: one workflow across both repos, and this repo finally
+has an off-device copy.
+
+---
+
 ## 2026-07-14 — U4 generation + BYO key · U5 polish & docs
 
 **Built**
@@ -115,4 +144,5 @@ re-sync pattern (see U2) keeps pulling TechPulse improvements forward.
 
 ---
 
-*Local repo (not yet on GitHub). Built with Claude Code.*
+*Private repo at [Ooolaa/CareerPulse](https://github.com/Ooolaa/CareerPulse).
+Built with Claude Code.*
