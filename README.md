@@ -1,4 +1,30 @@
-# CareerPulse
+# CareerPulse — retired
+
+> **This project is retired and archived as history. Nothing new is built here.**
+>
+> The work continues in **[TechPulse](https://github.com/Ooolaa/TechPulse)**,
+> which absorbed the runtime pack system this repo was built to prove. Packs are
+> runtime data there — a Pack file, validated and installed at launch — and the
+> AI Engineer pack is one built-in among others rather than the only possibility.
+> So CareerPulse's central idea shipped; what retired is the second app around it.
+>
+> **Why:** the two projects had converged on the same product, differing only in
+> where the map came from, and keeping both meant hand-merging every TechPulse
+> feature into this repo indefinitely. The reasoning, including the rejected
+> alternative of doing it the other way round, is
+> [ADR-0001](https://github.com/Ooolaa/TechPulse/blob/main/docs/adr/0001-one-app-packs-become-runtime-data.md).
+>
+> **What came across, and what did not**, file by file — the security tests and
+> `PRIVACY.md` came over; the draft and generator types are tracked as TechPulse
+> #27; the five accent palettes and the onboarding wizard were dropped, with
+> reasons —
+> [ADR-0005](https://github.com/Ooolaa/TechPulse/blob/main/docs/adr/0005-careerpulse-is-retired-and-what-came-across.md).
+>
+> This repository is kept deliberately: it is the source the port was taken
+> from, and the commit the inventory was taken against is `af8ab0c`. The
+> description below is preserved as it stood on that commit.
+
+---
 
 One app, any career, customized on your phone. CareerPulse turns the
 [TechPulse](../TechPulse) formula — curated news feed + living knowledge map +

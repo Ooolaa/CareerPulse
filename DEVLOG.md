@@ -1,5 +1,11 @@
 # CareerPulse — Development Log
 
+> **Closed 2026-08-17.** This project is retired; the log ends here. Work
+> continues in [TechPulse](https://github.com/Ooolaa/TechPulse), whose DEVLOG
+> carries it on. What came across and what was dropped is recorded in
+> [ADR-0005](https://github.com/Ooolaa/TechPulse/blob/main/docs/adr/0005-careerpulse-is-retired-and-what-came-across.md).
+> Everything below stands as written.
+
 > Daily record of the development process. Newest first. CareerPulse is the
 > career-agnostic "Lego blocks" evolution of [TechPulse](../TechPulse/DEVLOG.md):
 > one app, any career, customized on the phone. Spec: `CareerPulse-Template.md`.
